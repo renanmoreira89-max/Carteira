@@ -207,8 +207,8 @@
                         const btnDividendos = document.getElementById("btn-aba-dividendos");
                         
                         if (paginaReal === 0) {
-                            btnCarteira.className = "px-4 py-2 text-sm font-medium rounded-[18px] bg-emerald-600 text-white transition-all";
-                            btnDividendos.className = "px-4 py-2 text-sm font-medium rounded-[18px] text-slate-400 hover:text-slate-200 transition-all";
+                            btnCarteira.className = "px-4 py-2 text-sm font-medium rounded-[15px] bg-emerald-600 text-white transition-all";
+                            btnDividendos.className = "px-4 py-2 text-sm font-medium rounded-[14px] text-slate-400 hover:text-slate-200 transition-all";
                             try { localStorage.setItem("dashboard_aba_atual", 'carteira'); } catch(e) {}
                         } else {
                             btnCarteira.className = "px-4 py-2 text-sm font-medium rounded-[15px] text-slate-400 hover:text-slate-200 transition-all";
@@ -304,7 +304,7 @@
 
             if (ativos.length === 0) {
                 // SINTAXE CORRIGIDA: Adicionadas crases corretas na String
-                container.innerHTML = `<div class="text-center py-12 text-slate-500 bg-slate-800/20 border border-slate-700 rounded-[20px]">Nenhum ativo válido encontrado.</div>`;
+                container.innerHTML = `<div class="text-center py-12 text-slate-500 bg-slate-800/20 border border-slate-700 rounded-[18px]">Nenhum ativo válido encontrado.</div>`;
                 return;
             }
 
