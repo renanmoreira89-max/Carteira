@@ -366,7 +366,7 @@
 
             let ativoLocalizado = cacheAtivosCarteira.find(a => a.ticker === ativoDigitado);
             if (ativoLocalizado) {
-                avisoSpan.innerText = `${formatarQuantidade(ativoLocalizado.qtd)} cotas encontradas`;
+                avisoSpan.innerText = `${formatarQuantidade(ativoLocalizado.qtd)} cotas`;
             } else {
                 avisoSpan.innerText = "0 cotas";
             }
