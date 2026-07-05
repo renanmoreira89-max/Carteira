@@ -1,4 +1,4 @@
-const CACHE_NAME = 'carteira-v9';
+const CACHE_NAME = 'carteira-v10';
 // Usamos caminhos relativos para funcionar perfeitamente no GitHub Pages
 const ASSETS = [
   './',
