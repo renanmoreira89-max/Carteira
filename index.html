@@ -20,7 +20,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icon-192.png">
 
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-12 overflow-x-hidden">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-12 overflow-x-hidden">    
 
     <nav class="border-b border-slate-700 bg-slate-900 px-6 py-4 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -45,11 +45,11 @@
     </nav>
 
     <!-- Container controlador do Carrossel por gesto de deslize (Swipe) -->
-    <div id="carousel-viewport" class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar w-full">
+    <div id="carousel-viewport" class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar w-full">        
         
         <!-- PÁGINA 1: PATRIMÔNIO -->
         <div class="w-full shrink-0 snap-start">
-            <main id="conteudo-carteira" class="max-w-4xl mx-auto px-4 mt-8 space-y-5">
+            <main id="conteudo-carteira" class="max-w-4xl mx-auto px-4 mt-8 space-y-5">    
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div class="bg-slate-800/50 border border-slate-700 rounded-[40px] p-5">
@@ -84,7 +84,7 @@
 
         <!-- PÁGINA 2: PROVENTOS -->
         <div class="w-full shrink-0 snap-start">
-            <main id="conteudo-dividendos" class="max-w-7xl mx-auto px-4 sm:px-6 mt-8 space-y-6">
+            <main id="conteudo-dividendos" class="max-w-7xl mx-auto px-4 sm:px-6 mt-8 space-y-6">    
                 
                 <div class="bg-slate-800/40 border border-slate-700 rounded-[40px] p-5 flex flex-col gap-2 relative">
                     <div class="flex justify-between items-center w-full">
@@ -186,40 +186,82 @@
         // ================= SISTEMA DE CARTEIRA COM SCROLL DO CARROSSEL =================
 
         function alternarAba(aba, instantaneo = false) {
-            const viewport = document.getElementById("carousel-viewport");
-            if (!viewport) return;
+    const viewport = document.getElementById("carousel-viewport");
+    if (!viewport) return;
 
-            const targetLeft = aba === 'carteira' ? 0 : viewport.offsetWidth;
-            viewport.scrollTo({
-                left: targetLeft,
-                behavior: instantaneo ? 'auto' : 'smooth'
-            });
+    // Garante que ambos os conteúdos fiquem visíveis para o cálculo do scroll funcionar
+    document.getElementById("conteudo-carteira").classList.remove('hidden');
+    document.getElementById("conteudo-dividendos").classList.remove('hidden');
+
+    const targetLeft = aba === 'carteira' ? 0 : viewport.offsetWidth;
+    viewport.scrollTo({
+        left: targetLeft,
+        behavior: instantaneo ? 'auto' : 'smooth'
+    });
+
+    // Se a mudança for instantânea (como no carregamento inicial), já esconde a aba inativa direto
+    if (instantaneo) {
+        if (aba === 'carteira') {
+            document.getElementById("conteudo-dividendos").classList.add('hidden');
+        } else {
+            document.getElementById("conteudo-carteira").classList.add('hidden');
         }
+    }
+}
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const viewport = document.getElementById("carousel-viewport");
-            if (viewport) {
-                viewport.addEventListener('scroll', () => {
-                    const width = viewport.offsetWidth;
-                    if (width > 0) {
-                        const paginaReal = Math.round(viewport.scrollLeft / width);
-                        const btnCarteira = document.getElementById("btn-aba-carteira");
-                        const btnDividendos = document.getElementById("btn-aba-dividendos");
-                        
-                        if (paginaReal === 0) {
-                            btnCarteira.className = "px-4 py-2 text-sm font-medium rounded-[15px] bg-emerald-600 text-white transition-all";
-                            btnDividendos.className = "px-4 py-2 text-sm font-medium rounded-[14px] text-slate-400 hover:text-slate-200 transition-all";
-                            try { localStorage.setItem("dashboard_aba_atual", 'carteira'); } catch(e) {}
-                        } else {
-                            btnCarteira.className = "px-4 py-2 text-sm font-medium rounded-[15px] text-slate-400 hover:text-slate-200 transition-all";
-                            btnDividendos.className = "px-4 py-2 text-sm font-medium rounded-[15px] bg-emerald-600 text-white transition-all";
-                            try { localStorage.setItem("dashboard_aba_atual", 'dividendos'); } catch(e) {}
-                            renderizarDividendos(); 
-                        }
+
+        let scrollTimeout;
+
+window.addEventListener('DOMContentLoaded', () => {
+    const viewport = document.getElementById("carousel-viewport");
+    if (viewport) {
+        
+        // 1. Monitora o movimento do Scroll / Swipe
+        viewport.addEventListener('scroll', () => {
+            const width = viewport.offsetWidth;
+            if (width > 0) {
+                const paginaReal = Math.round(viewport.scrollLeft / width);
+                const btnCarteira = document.getElementById("btn-aba-carteira");
+                const btnDividendos = document.getElementById("btn-aba-dividendos");
+                const contCarteira = document.getElementById("conteudo-carteira");
+                const contDividendos = document.getElementById("conteudo-dividendos");
+
+                // Durante o arrasto, garante que as duas abas estejam visíveis na linha do carrossel
+                contCarteira.classList.remove('hidden');
+                contDividendos.classList.remove('hidden');
+                
+                if (paginaReal === 0) {
+                    btnCarteira.className = "px-4 py-2 text-sm font-medium rounded-[15px] bg-emerald-600 text-white transition-all";
+                    btnDividendos.className = "px-4 py-2 text-sm font-medium rounded-[14px] text-slate-400 hover:text-slate-200 transition-all";
+                    try { localStorage.setItem("dashboard_aba_atual", 'carteira'); } catch(e) {}
+                } else {
+                    btnCarteira.className = "px-4 py-2 text-sm font-medium rounded-[15px] text-slate-400 hover:text-slate-200 transition-all";
+                    btnDividendos.className = "px-4 py-2 text-sm font-medium rounded-[15px] bg-emerald-600 text-white transition-all";
+                    try { localStorage.setItem("dashboard_aba_atual", 'dividendos'); } catch(e) {}
+                    renderizarDividendos(); 
+                }
+
+                // Aguarda o movimento do scroll parar completamente (150ms de inatividade) para ajustar as alturas
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const paginaAtualizada = Math.round(viewport.scrollLeft / width);
+                    if (paginaAtualizada === 0) {
+                        contDividendos.classList.add('hidden'); // Esconde proventos se parou em patrimônio
+                    } else {
+                        contCarteira.classList.add('hidden'); // Esconde patrimônio se parou em proventos
                     }
-                });
+                }, 150);
             }
         });
+
+        // 2. Quando você colocar o dedo na tela para fazer o gesto de Swipe, reativa a visibilidade na hora
+        viewport.addEventListener('touchstart', () => {
+            document.getElementById("conteudo-carteira").classList.remove('hidden');
+            document.getElementById("conteudo-dividendos").classList.remove('hidden');
+        }, { passive: true });
+    }
+});
+
 
         function tratarNumeroBR(valor) {
             if (!valor) return 0;
@@ -304,7 +346,7 @@
 
             if (ativos.length === 0) {
                 // SINTAXE CORRIGIDA: Adicionadas crases corretas na String
-                container.innerHTML = `<div class="text-center py-12 text-slate-500 bg-slate-800/20 border border-slate-700 rounded-[18px]">Nenhum ativo válido encontrado.</div>`;
+                container.innerHTML = `<div class="text-center py-12 text-slate-500 bg-slate-800/20 border border-slate-700 rounded-[25px]">Nenhum ativo válido encontrado.</div>`;
                 return;
             }
 
