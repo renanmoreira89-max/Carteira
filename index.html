@@ -48,7 +48,7 @@
     <div id="carousel-viewport" class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar w-full">        
         
         <!-- PÁGINA 1: PATRIMÔNIO -->
-        <div class="w-full shrink-0 snap-start">
+        <div id="wrapper-carteira" class="w-full shrink-0 snap-start">
             <main id="conteudo-carteira" class="max-w-4xl mx-auto px-4 mt-8 space-y-5">    
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -83,7 +83,7 @@
         </div>
 
         <!-- PÁGINA 2: PROVENTOS -->
-        <div class="w-full shrink-0 snap-start">
+        <div id="wrapper-dividendos" class="w-full shrink-0 snap-start">
             <main id="conteudo-dividendos" class="max-w-7xl mx-auto px-4 sm:px-6 mt-8 space-y-6">    
                 
                 <div class="bg-slate-800/40 border border-slate-700 rounded-[40px] p-5 flex flex-col gap-2 relative">
@@ -185,13 +185,16 @@
 
         // ================= SISTEMA DE CARTEIRA COM SCROLL DO CARROSSEL =================
 
-        function alternarAba(aba, instantaneo = false) {
+function alternarAba(aba, instantaneo = false) {
     const viewport = document.getElementById("carousel-viewport");
     if (!viewport) return;
 
-    // Garante que ambos os conteúdos fiquem visíveis para o cálculo do scroll funcionar
-    document.getElementById("conteudo-carteira").classList.remove('hidden');
-    document.getElementById("conteudo-dividendos").classList.remove('hidden');
+    const wrapCarteira = document.getElementById("wrapper-carteira");
+    const wrapDividendos = document.getElementById("wrapper-dividendos");
+
+    // Remove temporariamente as travas de altura para permitir a transição suave
+    wrapCarteira.classList.remove('max-h-0', 'overflow-hidden');
+    wrapDividendos.classList.remove('max-h-0', 'overflow-hidden');
 
     const targetLeft = aba === 'carteira' ? 0 : viewport.offsetWidth;
     viewport.scrollTo({
@@ -199,18 +202,17 @@
         behavior: instantaneo ? 'auto' : 'smooth'
     });
 
-    // Se a mudança for instantânea (como no carregamento inicial), já esconde a aba inativa direto
+    // Se for o carregamento inicial (instantâneo), já aplica a trava imediatamente
     if (instantaneo) {
         if (aba === 'carteira') {
-            document.getElementById("conteudo-dividendos").classList.add('hidden');
+            wrapDividendos.classList.add('max-h-0', 'overflow-hidden');
         } else {
-            document.getElementById("conteudo-carteira").classList.add('hidden');
+            wrapCarteira.classList.add('max-h-0', 'overflow-hidden');
         }
     }
 }
 
-
-        let scrollTimeout;
+let scrollTimeout;
 
 window.addEventListener('DOMContentLoaded', () => {
     const viewport = document.getElementById("carousel-viewport");
@@ -223,12 +225,12 @@ window.addEventListener('DOMContentLoaded', () => {
                 const paginaReal = Math.round(viewport.scrollLeft / width);
                 const btnCarteira = document.getElementById("btn-aba-carteira");
                 const btnDividendos = document.getElementById("btn-aba-dividendos");
-                const contCarteira = document.getElementById("conteudo-carteira");
-                const contDividendos = document.getElementById("conteudo-dividendos");
+                const wrapCarteira = document.getElementById("wrapper-carteira");
+                const wrapDividendos = document.getElementById("wrapper-dividendos");
 
-                // Durante o arrasto, garante que as duas abas estejam visíveis na linha do carrossel
-                contCarteira.classList.remove('hidden');
-                contDividendos.classList.remove('hidden');
+                // Durante o movimento, ambas as abas precisam de altura livre
+                wrapCarteira.classList.remove('max-h-0', 'overflow-hidden');
+                wrapDividendos.classList.remove('max-h-0', 'overflow-hidden');
                 
                 if (paginaReal === 0) {
                     btnCarteira.className = "px-4 py-2 text-sm font-medium rounded-[15px] bg-emerald-600 text-white transition-all";
@@ -241,26 +243,27 @@ window.addEventListener('DOMContentLoaded', () => {
                     renderizarDividendos(); 
                 }
 
-                // Aguarda o movimento do scroll parar completamente (150ms de inatividade) para ajustar as alturas
+                // Aguarda a animação de scroll parar (150ms) para achatar a altura da aba oculta
                 clearTimeout(scrollTimeout);
                 scrollTimeout = setTimeout(() => {
                     const paginaAtualizada = Math.round(viewport.scrollLeft / width);
                     if (paginaAtualizada === 0) {
-                        contDividendos.classList.add('hidden'); // Esconde proventos se parou em patrimônio
+                        wrapDividendos.classList.add('max-h-0', 'overflow-hidden');
                     } else {
-                        contCarteira.classList.add('hidden'); // Esconde patrimônio se parou em proventos
+                        wrapCarteira.classList.add('max-h-0', 'overflow-hidden');
                     }
                 }, 150);
             }
         });
 
-        // 2. Quando você colocar o dedo na tela para fazer o gesto de Swipe, reativa a visibilidade na hora
+        // 2. Quando encostar o dedo para arrastar, libera as alturas instantaneamente
         viewport.addEventListener('touchstart', () => {
-            document.getElementById("conteudo-carteira").classList.remove('hidden');
-            document.getElementById("conteudo-dividendos").classList.remove('hidden');
+            document.getElementById("wrapper-carteira").classList.remove('max-h-0', 'overflow-hidden');
+            document.getElementById("wrapper-dividendos").classList.remove('max-h-0', 'overflow-hidden');
         }, { passive: true });
     }
 });
+
 
 
         function tratarNumeroBR(valor) {
